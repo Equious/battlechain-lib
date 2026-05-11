@@ -15,17 +15,27 @@ abstract contract BCBase is Script {
     address private _factoryOverride;
     address private _attackRegistryOverride;
     address private _deployerOverride;
+    address private _confidencePoolFactoryOverride;
 
     /// @notice Set address overrides for local testing or unsupported chains.
     function _setBcAddresses(address registry_, address factory_, address attackRegistry_, address deployer_) internal {
-        if (registry_ == address(0) || factory_ == address(0) || attackRegistry_ == address(0) || deployer_ == address(0))
-        {
+        if (
+            registry_ == address(0) || factory_ == address(0) || attackRegistry_ == address(0)
+                || deployer_ == address(0)
+        ) {
             revert BCBase__ZeroAddress();
         }
         _registryOverride = registry_;
         _factoryOverride = factory_;
         _attackRegistryOverride = attackRegistry_;
         _deployerOverride = deployer_;
+    }
+
+    /// @notice Set the confidence pool factory override. Independent of `_setBcAddresses`
+    /// because the factory was added after the original API and not every script needs it.
+    function _setConfidencePoolFactory(address factory_) internal {
+        if (factory_ == address(0)) revert BCBase__ZeroAddress();
+        _confidencePoolFactoryOverride = factory_;
     }
 
     function _bcRegistry() internal view returns (address) {
@@ -47,6 +57,11 @@ abstract contract BCBase is Script {
         if (_deployerOverride != address(0)) return _deployerOverride;
         if (_isBattleChain()) return BCConfig.deployer();
         return BCConfig.createX();
+    }
+
+    function _bcConfidencePoolFactory() internal view returns (address) {
+        if (_confidencePoolFactoryOverride != address(0)) return _confidencePoolFactoryOverride;
+        return BCConfig.confidencePoolFactory();
     }
 
     function _isBattleChain() internal view returns (bool) {

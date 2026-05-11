@@ -51,6 +51,9 @@ library BCConfig {
     address internal constant TESTNET_ATTACK_REGISTRY_IMPL = 0x34328AeBd4e3b173B71144AB29F4509E6816277c;
     address internal constant TESTNET_MOCK_REGISTRY_MODERATOR = 0x1bC64E6F187a47D136106784f4E9182801535BD3;
 
+    /// @notice Confidence pool factory proxy. Placeholder until pools are deployed to testnet.
+    address internal constant TESTNET_CONFIDENCE_POOL_FACTORY = address(0);
+
     // -------------------------------------------------------------------------
     // Errors
     // -------------------------------------------------------------------------
@@ -78,6 +81,14 @@ library BCConfig {
 
     function deployer() internal view returns (address) {
         if (block.chainid == TESTNET_CHAIN_ID) return TESTNET_DEPLOYER;
+        revert BCConfig__UnsupportedChainId(block.chainid);
+    }
+
+    function confidencePoolFactory() internal view returns (address) {
+        if (block.chainid == TESTNET_CHAIN_ID) {
+            if (TESTNET_CONFIDENCE_POOL_FACTORY == address(0)) revert BCConfig__UnsupportedChainId(block.chainid);
+            return TESTNET_CONFIDENCE_POOL_FACTORY;
+        }
         revert BCConfig__UnsupportedChainId(block.chainid);
     }
 
